@@ -1,122 +1,32 @@
+
 using UnityEngine;
 using System.Collections;
 using System.Collections.Generic;
 
-/// MouseLook rotates the transform based on the mouse delta.
-/// Minimum and Maximum values can be used to constrain the possible rotation
-
-/// To make an FPS style character:
-/// - Create a capsule.
-/// - Add a rigid body to the capsule
-/// - Add the MouseLook script to the capsule.
-///   -> Set the mouse look to use LookX. (You want to only turn character but not tilt it)
-/// - Add FPSWalker script to the capsule
-
-/// - Create a camera. Make the camera a child of the capsule. Reset it's transform.
-/// - Add a MouseLook script to the camera.
-///   -> Set the mouse look to use LookY. (You want the camera to tilt up and down like a head. The character already turns.)
-[AddComponentMenu("Camera-Control/Mouse Look")]
 public class MouseLook : MonoBehaviour {
 
-    public enum RotationAxes { MouseXAndY = 0, MouseX = 1, MouseY = 2 }
-    public RotationAxes axes = RotationAxes.MouseXAndY;
-    public float sensitivityX = 2.5F;
-    public float sensitivityY = 2.5F;
+    public float MouseSens = 80f;
+    public Transform PlayerBody;
 
-    public float minimumX = -360F;
-    public float maximumX = 360F;
+    public float Xrotatin = 0f;
 
-    public float minimumY = -60F;
-    public float maximumY = 60F;
+        void Start(){
 
-    float rotationX = 0F;
-    float rotationY = 0F;
+            Cursor.lockState = CursorLockMode.Locked;
+            Cursor.visible = false;
 
-    Quaternion originalRotation;
-
-    void Start ()
-    {
-        Cursor.lockState = CursorLockMode.Locked;
-        Cursor.visible = false;
-
-        // Make the rigid body not change rotation
-        if (GetComponent<Rigidbody>())
-            GetComponent<Rigidbody>().freezeRotation = true;
-        originalRotation = transform.localRotation;
-    }
-    void Update ()
-    {
-        if (axes == RotationAxes.MouseXAndY)
-        {
-            // Read the mouse input axis
-            rotationX += Input.GetAxis("Mouse X") * sensitivityX;
-            rotationY += Input.GetAxis("Mouse Y") * sensitivityY;
-
-            rotationX = ClampAngle (rotationX, minimumX, maximumX);
-            rotationY = ClampAngle (rotationY, minimumY, maximumY);
-
-            Quaternion xQuaternion = Quaternion.AngleAxis (rotationX, Vector3.up);
-            Quaternion yQuaternion = Quaternion.AngleAxis (rotationY, -Vector3.right);
-
-            transform.localRotation = originalRotation * xQuaternion * yQuaternion;
         }
-        else if (axes == RotationAxes.MouseX)
-        {
-            rotationX += Input.GetAxis("Mouse X") * sensitivityX;
-            rotationX = ClampAngle (rotationX, minimumX, maximumX);
 
-            Quaternion xQuaternion = Quaternion.AngleAxis (rotationX, Vector3.up);
-            transform.localRotation = originalRotation * xQuaternion;
+        void Update(){
+
+            float MouseX = Input.GetAxis("Mouse X") * MouseSens * Time.deltaTime;
+            float MouseY = Input.GetAxis("Mouse Y") * MouseSens * Time.deltaTime;
+
+            Xrotatin -= MouseY;
+            Xrotatin = Mathf.Clamp(Xrotatin, -90f ,90f );
+
+            transform.localRotation = Quaternion.Euler(Xrotatin,0f,0f);
+            PlayerBody.Rotate(Vector3.up * MouseX);
+
         }
-        else
-        {
-            rotationY += Input.GetAxis("Mouse Y") * sensitivityY;
-            rotationY = ClampAngle (rotationY, minimumY, maximumY);
-
-            Quaternion yQuaternion = Quaternion.AngleAxis (-rotationY, Vector3.right);
-            transform.localRotation = originalRotation * yQuaternion;
-        }
-    }
-
-
-    public static float ClampAngle (float angle, float min, float max)
-    {
-        if (angle < -360F)
-            angle += 360F;
-        if (angle > 360F)
-            angle -= 360F;
-        return Mathf.Clamp (angle, min, max);
-    }
 }
-
-// using UnityEngine;
-// using System.Collections;
-// using System.Collections.Generic;
-
-// public class MouseLook : MonoBehaviour {
-
-//     public float MouseSens = 80f;
-//     public Transform PlayerBody;
-
-//     public float Xrotatin = 0f;
-
-//         void Start(){
-
-//             Cursor.lockState = CursorLockMode.Locked;
-//             Cursor.visible = false;
-
-//         }
-
-//         void Update(){
-
-//             float MouseX = Input.GetAxis("Mouse X") * MouseSens * Time.deltaTime;
-//             float MouseY = Input.GetAxis("Mouse Y") * MouseSens * Time.deltaTime;
-
-//             Xrotatin -= MouseY;
-//             Xrotatin = Mathf.Clamp(Xrotatin, -90f ,90f );
-//             transform.localRotation = Quaternion.Euler(Xrotatin,0f,0f);
-
-//             PlayerBody.Rotate(Vector3.up * MouseX);
-
-//         }
-// }
