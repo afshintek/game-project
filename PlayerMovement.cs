@@ -37,7 +37,7 @@ public class PlayerMovement : MonoBehaviour
             velocity.y = jumpheight;
         }
 
-        velocity.y += gravity * Time.deltaTime;
+        velocity.y += gravity * Time.deltaTime * 2;
         Controller.Move(velocity * Time.deltaTime);
         
     }
